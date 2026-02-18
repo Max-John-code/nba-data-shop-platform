@@ -1,0 +1,28 @@
+﻿{
+"pages": [
+{
+"path": "pages/index/index",
+"style": {
+"navigationBarTitleText": "NBA球星数据咨询"
+}
+},
+{
+"path": "pages/login/login",
+"style": {
+"navigationBarTitleText": "登录"
+}
+},
+{
+"path": "pages/news/detail",
+"style": {
+"navigationBarTitleText": "新闻详情"
+}
+}
+],
+"globalStyle": {
+"navigationBarTextStyle": "black",
+"navigationBarTitleText": "NBA球星数据咨询",
+"navigationBarBackgroundColor": "#F8F8F8",
+"backgroundColor": "#F8F8F8"
+}
+}
