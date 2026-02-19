@@ -33,8 +33,12 @@
       </view>
 
       <view class="agreement">
-        <checkbox v-model="isAgree" />
-        <text>我已阅读并同意用户协议及隐私条款</text>
+        <checkbox-group @change="handleAgreeChange">
+          <label>
+            <checkbox :checked="isAgree" />
+            <text>我已阅读并同意用户协议及隐私条款</text>
+          </label>
+        </checkbox-group>
       </view>
 
       <view class="login-btn" @click="login">登录</view>
@@ -95,8 +99,12 @@
       </view>
 
       <view class="agreement">
-        <checkbox v-model="isAgree" />
-        <text>我已阅读并同意用户协议及隐私条款</text>
+        <checkbox-group @change="handleAgreeChange">
+          <label>
+            <checkbox :checked="isAgree" />
+            <text>我已阅读并同意用户协议及隐私条款</text>
+          </label>
+        </checkbox-group>
       </view>
 
       <view class="register-btn" @click="register">注册</view>
@@ -129,6 +137,9 @@ export default {
     }
   },
   methods: {
+    handleAgreeChange(e) {
+      this.isAgree = e.detail.value.length > 0
+    },
     toggleRegister() {
       this.isRegister = !this.isRegister
       this.resetForm()
@@ -340,11 +351,19 @@ export default {
 }
 
 .agreement {
-  display: flex;
-  align-items: center;
   margin-bottom: 40rpx;
   font-size: 26rpx;
   color: #666;
+}
+
+.agreement checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.agreement label {
+  display: flex;
+  align-items: center;
 }
 
 .agreement checkbox {
