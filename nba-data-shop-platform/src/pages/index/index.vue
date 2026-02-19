@@ -7,22 +7,21 @@
         <input type="text" placeholder="搜我想看" class="search-input" />
       </view>
       <view v-if="!isLogin" class="login-btn" @click="goLogin">登录</view>
-      <view v-else class="user-info" @click="goUserCenter">个人中心</view>
+      <view v-else class="user-info" @click="goUserCenter">
+        <text v-if="userRole === 'admin'" class="admin-badge">管理员</text>
+        <text v-else>个人中心</text>
+      </view>
     </view>
 
     <view class="nav-menu">
       <view class="nav-item active">首页</view>
-      <view class="nav-item">热榜</view>
-      <view class="nav-item">评分</view>
-      <view class="nav-item">篮球</view>
-      <view class="nav-item">足球</view>
-      <view class="nav-item">步行街</view>
-      <view class="nav-item">电竞</view>
+      <view class="nav-item" @click="goToRanking">联盟榜单</view>
+      <view class="nav-item" @click="showComingSoon('交流论坛')">交流论坛</view>
+      <view class="nav-item" @click="showComingSoon('留言板')">留言板</view>
     </view>
 
     <view class="league-tabs">
       <view class="league-tab active">NBA</view>
-      <view class="league-tab">CBA</view>
     </view>
 
     <view class="matches-container">
@@ -78,22 +77,6 @@
         <view class="news-tag">直播</view>
       </view>
     </view>
-
-    <!-- 推荐新闻 -->
-    <view class="recommend-section">
-      <view class="recommend-title">推荐</view>
-      <view class="recommend-item" @click="goNewsDetail(5)">
-        <view class="recommend-label">资讯</view>
-        <view class="recommend-content">
-          <view class="recommend-text">流言板米切尔：作为老鹰球迷若能与他同队会很特别但那不取决于我</view>
-          <view class="recommend-meta">
-            <text>487</text>
-            <text>548</text>
-          </view>
-        </view>
-        <image src="https://via.placeholder.com/100x80?text=NBA" class="recommend-image" />
-      </view>
-    </view>
   </view>
 </template>
 
@@ -102,6 +85,7 @@ export default {
   data() {
     return {
       isLogin: false,
+      userRole: '',
       matches: [
         {
           id: 1,
@@ -164,6 +148,10 @@ export default {
       const userInfo = uni.getStorageSync('userInfo')
       if (userInfo) {
         this.isLogin = true
+        this.userRole = userInfo.role || 'user'
+      } else {
+        this.isLogin = false
+        this.userRole = ''
       }
     },
     goLogin() {
@@ -172,16 +160,27 @@ export default {
       })
     },
     goUserCenter() {
+      const itemList = this.userRole === 'admin' 
+        ? ['个人信息', '管理后台', '退出登录']
+        : ['个人信息', '退出登录']
+      
       uni.showActionSheet({
-        itemList: ['个人信息', '退出登录'],
+        itemList: itemList,
         success: (res) => {
-          if (res.tapIndex === 0) {
-            uni.showToast({
-              title: '个人信息功能开发中',
-              icon: 'none'
-            })
-          } else if (res.tapIndex === 1) {
-            this.logout()
+          if (this.userRole === 'admin') {
+            if (res.tapIndex === 0) {
+              uni.navigateTo({ url: '/pages/profile/index' })
+            } else if (res.tapIndex === 1) {
+              uni.navigateTo({ url: '/pages/admin/index' })
+            } else if (res.tapIndex === 2) {
+              this.logout()
+            }
+          } else {
+            if (res.tapIndex === 0) {
+              uni.navigateTo({ url: '/pages/profile/index' })
+            } else if (res.tapIndex === 1) {
+              this.logout()
+            }
           }
         }
       })
@@ -195,6 +194,7 @@ export default {
             uni.removeStorageSync('token')
             uni.removeStorageSync('userInfo')
             this.isLogin = false
+            this.userRole = ''
             uni.showToast({
               title: '已退出登录',
               icon: 'success'
@@ -206,6 +206,17 @@ export default {
     goNewsDetail(id) {
       uni.navigateTo({
         url: `/pages/news/detail?id=${id}`
+      })
+    },
+    goToRanking() {
+      uni.navigateTo({
+        url: '/pages/ranking/index'
+      })
+    },
+    showComingSoon(feature) {
+      uni.showToast({
+        title: `${feature}功能开发中`,
+        icon: 'none'
       })
     }
   }
@@ -282,6 +293,16 @@ export default {
   font-size: 26rpx;
   font-weight: bold;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.admin-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8rpx 15rpx;
+  border-radius: 4rpx;
+  font-size: 24rpx;
 }
 
 .nav-menu {
@@ -494,63 +515,5 @@ export default {
   padding: 4rpx 10rpx;
   border-radius: 3rpx;
   font-size: 20rpx;
-}
-
-.recommend-section {
-  background-color: #fff;
-  margin: 15rpx 0;
-  padding: 20rpx;
-}
-
-.recommend-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20rpx;
-}
-
-.recommend-item {
-  display: flex;
-  padding: 20rpx;
-  background-color: #f9f9f9;
-  border-radius: 6rpx;
-  align-items: flex-start;
-}
-
-.recommend-label {
-  background-color: #e74c3c;
-  color: white;
-  padding: 4rpx 10rpx;
-  border-radius: 3rpx;
-  font-size: 20rpx;
-  margin-right: 15rpx;
-  white-space: nowrap;
-  margin-top: 5rpx;
-}
-
-.recommend-content {
-  flex: 1;
-  margin-right: 15rpx;
-}
-
-.recommend-text {
-  font-size: 28rpx;
-  color: #333;
-  line-height: 1.4;
-  margin-bottom: 10rpx;
-}
-
-.recommend-meta {
-  display: flex;
-  font-size: 22rpx;
-  color: #999;
-  gap: 20rpx;
-}
-
-.recommend-image {
-  width: 100rpx;
-  height: 80rpx;
-  border-radius: 4rpx;
-  object-fit: cover;
 }
 </style>

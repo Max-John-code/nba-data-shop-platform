@@ -26,3 +26,30 @@ export const register = (phone, sms_code) => {
     data: { phone, sms_code }
   })
 }
+
+
+// 获取个人信息
+export const getProfile = () => {
+  return request({
+    url: '/accounts/profile/',
+    method: 'GET'
+  })
+}
+
+// 更新个人信息
+export const updateProfile = (data) => {
+  return request({
+    url: '/accounts/profile/',
+    method: 'PUT',
+    data
+  })
+}
+
+// 上传头像
+export const uploadAvatar = (avatar) => {
+  return request({
+    url: '/accounts/upload-avatar/',
+    method: 'POST',
+    data: { avatar }
+  })
+}

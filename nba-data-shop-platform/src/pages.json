@@ -13,9 +13,59 @@
 }
 },
 {
+"path": "pages/ranking/index",
+"style": {
+"navigationBarTitleText": "联盟榜单",
+"navigationBarBackgroundColor": "#667eea",
+"navigationBarTextStyle": "white"
+}
+},
+{
+"path": "pages/profile/index",
+"style": {
+"navigationBarTitleText": "个人中心"
+}
+},
+{
 "path": "pages/news/detail",
 "style": {
 "navigationBarTitleText": "新闻详情"
+}
+},
+{
+"path": "pages/admin/index",
+"style": {
+"navigationBarTitleText": "管理后台"
+}
+},
+{
+"path": "pages/admin/player-form",
+"style": {
+"navigationBarTitleText": "球员信息"
+}
+},
+{
+"path": "pages/admin/players",
+"style": {
+"navigationBarTitleText": "联盟榜单管理"
+}
+},
+{
+"path": "pages/admin/users",
+"style": {
+"navigationBarTitleText": "用户管理"
+}
+},
+{
+"path": "pages/admin/stars",
+"style": {
+"navigationBarTitleText": "现役球星管理"
+}
+},
+{
+"path": "pages/admin/star-form",
+"style": {
+"navigationBarTitleText": "球星信息"
 }
 }
 ],
