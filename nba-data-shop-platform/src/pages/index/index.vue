@@ -156,6 +156,9 @@ export default {
   onLoad() {
     this.checkLogin()
   },
+  onShow() {
+    this.checkLogin()
+  },
   methods: {
     checkLogin() {
       const userInfo = uni.getStorageSync('userInfo')
