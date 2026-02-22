@@ -43,6 +43,14 @@
       </view>
     </view>
 
+    <view class="menu-section">
+      <view class="menu-item" @click="goToOrders">
+        <text class="menu-icon">📦</text>
+        <text class="menu-label">我的订单</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+
     <view class="logout-btn" @click="logout">退出登录</view>
   </view>
 </template>
@@ -278,6 +286,9 @@ export default {
         }
       })
     },
+    goToOrders() {
+      uni.navigateTo({ url: '/pages/shop/orders' })
+    },
     formatTime(timeStr) {
       if (!timeStr) return ''
       const date = new Date(timeStr)
@@ -402,3 +413,38 @@ export default {
   font-weight: bold;
 }
 </style>
+
+
+.menu-section {
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.menu-label {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.menu-arrow {
+  font-size: 28rpx;
+  color: #999;
+}

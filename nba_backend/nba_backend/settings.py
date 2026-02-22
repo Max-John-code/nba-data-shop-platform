@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'players',
+    'matches',
+    'forum',
+    'guestbook',
+    'shop',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +151,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
+
+# 文件上传限制（增加到10MB）
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB

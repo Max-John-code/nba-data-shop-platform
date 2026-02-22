@@ -37,6 +37,30 @@
         <view class="menu-name">今日赛事管理</view>
         <view class="menu-desc">管理比赛信息</view>
       </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/articles')">
+        <view class="menu-icon forum-icon">💬</view>
+        <view class="menu-name">交流论坛管理</view>
+        <view class="menu-desc">管理文章和评论</view>
+      </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/messages')">
+        <view class="menu-icon message-icon">✉️</view>
+        <view class="menu-name">留言板管理</view>
+        <view class="menu-desc">管理用户留言</view>
+      </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/products')">
+        <view class="menu-icon shop-icon">🛍️</view>
+        <view class="menu-name">商品管理</view>
+        <view class="menu-desc">管理商城商品</view>
+      </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/orders')">
+        <view class="menu-icon">📋</view>
+        <view class="menu-name">订单管理</view>
+        <view class="menu-desc">管理用户订单</view>
+      </view>
     </view>
   </view>
 </template>
@@ -210,4 +234,17 @@ export default {
 
 .star-icon {
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+}
+
+.forum-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.message-icon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+
+.shop-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }

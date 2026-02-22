@@ -7,9 +7,10 @@
 
     <view class="ranking-list">
       <view v-for="player in players" :key="player.id" class="ranking-item">
-        <view class="rank-badge" :class="getRankClass(player.ranking)">
+        <view v-if="player.ranking >= 1 && player.ranking <= 3" class="rank-badge" :class="getRankClass(player.ranking)">
           <text class="rank-number">{{ player.ranking }}</text>
         </view>
+        <view v-else class="rank-placeholder"></view>
         
         <view class="player-avatar">
           <image v-if="player.avatar" :src="player.avatar" mode="aspectFill" />
@@ -53,7 +54,9 @@ import { getPlayerList } from '@/api/player'
 export default {
   data() {
     return {
-      players: []
+      players: [],
+      topThree: [],
+      others: []
     }
   },
   onLoad() {
@@ -65,7 +68,17 @@ export default {
       
       getPlayerList('ranking').then(res => {
         if (res.code === 200) {
-          this.players = res.data.players
+          const allPlayers = res.data.players
+          
+          // 分离前三名和其他球员
+          this.topThree = allPlayers.filter(p => p.ranking >= 1 && p.ranking <= 3)
+            .sort((a, b) => a.ranking - b.ranking)
+          
+          this.others = allPlayers.filter(p => p.ranking === 0 || p.ranking > 3)
+            .sort((a, b) => b.id - a.id) // 按ID倒序，最新添加的在前
+          
+          // 合并显示
+          this.players = [...this.topThree, ...this.others]
         }
       }).catch(err => {
         console.error('加载榜单失败', err)
@@ -138,6 +151,12 @@ export default {
   flex-shrink: 0;
 }
 
+.rank-placeholder {
+  width: 80rpx;
+  height: 80rpx;
+  flex-shrink: 0;
+}
+
 .rank-gold {
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   box-shadow: 0 4rpx 12rpx rgba(255, 215, 0, 0.5);
@@ -199,9 +218,6 @@ export default {
   font-weight: bold;
   color: #fff;
   margin-bottom: 8rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .player-team {

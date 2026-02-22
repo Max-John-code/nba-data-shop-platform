@@ -2,7 +2,7 @@ import { request } from '@/utils/request'
 
 // 获取球员列表
 export const getPlayerList = (type = null) => {
-  const params = type ? { type } : {}
+  const params = type ? { type, _t: Date.now() } : { _t: Date.now() }
   return request({
     url: '/players/',
     method: 'GET',

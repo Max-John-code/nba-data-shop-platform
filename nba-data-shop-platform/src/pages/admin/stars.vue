@@ -10,7 +10,6 @@
 
     <view class="player-list">
       <view v-for="player in players" :key="player.id" class="player-item">
-        <view class="player-rank">{{ player.ranking }}</view>
         <view class="player-avatar">
           <image v-if="player.avatar" :src="player.avatar" mode="aspectFill" />
           <view v-else class="avatar-placeholder">{{ player.name.charAt(0) }}</view>
@@ -154,19 +153,12 @@ export default {
   gap: 20rpx;
 }
 
-.player-rank {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #e74c3c;
-  min-width: 80rpx;
-  text-align: center;
-}
-
 .player-avatar {
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .player-avatar image {

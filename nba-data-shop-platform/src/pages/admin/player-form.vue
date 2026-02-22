@@ -25,8 +25,8 @@
         </view>
 
         <view class="form-item">
-          <view class="form-label">排名 *</view>
-          <input v-model.number="formData.ranking" type="number" placeholder="请输入排名" class="form-input" />
+          <view class="form-label">排名（前3名需填写）</view>
+          <input v-model.number="formData.ranking" type="number" placeholder="1-3为前三名，其他可不填" class="form-input" />
         </view>
 
         <view class="form-item">
@@ -176,9 +176,15 @@ export default {
         return
       }
       
-      if (!this.formData.ranking) {
-        uni.showToast({ title: '请输入排名', icon: 'none' })
+      // 排名不是必填，但如果填了需要验证范围
+      if (this.formData.ranking && (this.formData.ranking < 0 || this.formData.ranking > 999)) {
+        uni.showToast({ title: '排名范围应在0-999之间', icon: 'none' })
         return
+      }
+      
+      // 如果没有填写排名，设置为0
+      if (!this.formData.ranking) {
+        this.formData.ranking = 0
       }
       
       uni.showLoading({ title: '提交中...' })

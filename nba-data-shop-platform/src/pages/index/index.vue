@@ -2,9 +2,9 @@
   <view class="container">
     <view class="header">
       <view class="logo">NBA球星数据咨询</view>
-      <view class="search-box">
+      <view class="search-box" @click="goToSearch">
         <text class="search-icon">搜</text>
-        <input type="text" placeholder="搜我想看" class="search-input" />
+        <view class="search-placeholder">搜我想看</view>
       </view>
       <view v-if="!isLogin" class="login-btn" @click="goLogin">登录</view>
       <view v-else class="user-info" @click="goUserCenter">
@@ -16,12 +16,30 @@
     <view class="nav-menu">
       <view class="nav-item active">首页</view>
       <view class="nav-item" @click="goToRanking">联盟榜单</view>
-      <view class="nav-item" @click="showComingSoon('交流论坛')">交流论坛</view>
-      <view class="nav-item" @click="showComingSoon('留言板')">留言板</view>
+      <view class="nav-item" @click="goToStars">现役球星</view>
+      <view class="nav-item" @click="goToForum">交流论坛</view>
+      <view class="nav-item" @click="goToMessages">留言板</view>
+      <view class="nav-item" @click="goToShop">球星商城</view>
     </view>
 
     <view class="league-tabs">
       <view class="league-tab active">NBA</view>
+    </view>
+
+    <!-- 球星商城横幅 -->
+    <view class="shop-banner" @click="goToShop">
+      <view class="banner-left">
+        <view class="banner-icon">🛍️</view>
+        <view class="banner-content">
+          <view class="banner-title">球星周边商城</view>
+          <view class="banner-subtitle">正品球衣·限量球鞋·潮流配饰</view>
+        </view>
+      </view>
+      <view class="banner-right">
+        <text class="banner-btn">立即选购</text>
+        <text class="banner-arrow">›</text>
+      </view>
+      <view class="banner-badge">HOT</view>
     </view>
 
     <view class="matches-container">
@@ -34,7 +52,7 @@
           </view>
           <view class="score">
             <view class="score-main">{{ match.team1.score }} - {{ match.team2.score }}</view>
-            <view class="score-sub">{{ match.viewers }}人评分</view>
+            <view class="match-status">{{ getStatusLabel(match.status) }}</view>
           </view>
           <view class="team team-right">
             <view class="team-name">{{ match.team2.name }}</view>
@@ -44,106 +62,97 @@
       </view>
     </view>
 
-    <view class="more-matches">
-      <text>2月12日 今日全部比赛</text>
-      <text class="arrow">14场 ></text>
+    <view class="more-matches" @click="showAllMatches">
+      <text>{{ getTodayDate() }} 今日全部比赛</text>
+      <text class="arrow">{{ totalMatches }}场 ></text>
     </view>
 
-    <view class="features">
-      <view class="feature-item">
-        <view class="feature-icon">赛</view>
-        <view class="feature-name">赛程</view>
+    <!-- 热门新闻 -->
+    <view class="hot-news" v-if="hotArticle" @click="goToArticle(hotArticle.id)">
+      <view class="news-header">
+        <view class="news-title-text">热门新闻</view>
       </view>
-      <view class="feature-item">
-        <view class="feature-icon">榜</view>
-        <view class="feature-name">球队榜</view>
-      </view>
-      <view class="feature-item">
-        <view class="feature-icon">员</view>
-        <view class="feature-name">球员榜</view>
-      </view>
-    </view>
-
-    <view class="news-container">
-      <view v-for="news in newsList" :key="news.id" class="news-item" @click="goNewsDetail(news.id)">
-        <view class="news-content">
-          <view class="news-title">{{ news.title }}</view>
-          <view class="news-meta">
-            <text class="comment-count">{{ news.comments }}</text>
-            <text class="like-count">{{ news.likes }}</text>
-          </view>
+      <image v-if="hotArticle.image" :src="hotArticle.image" class="news-cover" mode="aspectFill" />
+      <view class="news-info">
+        <view class="news-title">{{ hotArticle.title }}</view>
+        <view class="news-meta">
+          <text class="author">{{ hotArticle.author_name }}</text>
+          <text class="dot">·</text>
+          <text class="views">{{ hotArticle.view_count }}浏览</text>
+          <text class="dot">·</text>
+          <text class="comments">{{ hotArticle.comment_count }}评论</text>
         </view>
-        <view class="news-image">图</view>
-        <view class="news-tag">直播</view>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import { getMatchList } from '@/api/match'
+import { getArticleList } from '@/api/forum'
+
 export default {
   data() {
     return {
       isLogin: false,
       userRole: '',
-      matches: [
-        {
-          id: 1,
-          date: '2月12日',
-          team1: { name: '快船', logo: 'LAC', score: 105 },
-          team2: { name: '火箭', logo: 'HOU', score: 102 },
-          viewers: '17.6万'
-        },
-        {
-          id: 2,
-          date: '2月12日',
-          team1: { name: '奇才', logo: 'WAS', score: 113 },
-          team2: { name: '骑士', logo: 'CLE', score: 138 },
-          viewers: '15.4万'
-        },
-        {
-          id: 3,
-          date: '2月12日',
-          team1: { name: '马刺', logo: 'SAS', score: 126 },
-          team2: { name: '勇士', logo: 'GSW', score: 113 },
-          viewers: '12.7万'
-        }
-      ],
-      newsList: [
-        {
-          id: 1,
-          title: '美媒对比韦拉格与布泽尔赛季数据，布泽尔全面占优',
-          comments: 0,
-          likes: 0
-        },
-        {
-          id: 2,
-          title: '又打出来一个！14号秀卡特布莱恩特，马刺的争冠拼图？',
-          comments: 11,
-          likes: 5
-        },
-        {
-          id: 3,
-          title: '西亚卡姆：我不想被卷入摔跤的讨论范蜚，我几乎每场都上',
-          comments: 15,
-          likes: 3
-        },
-        {
-          id: 4,
-          title: 'SGA：我和保罗关系很亲密，他对我的职业生涯意义非凡',
-          comments: 29,
-          likes: 23
-        }
-      ]
+      matches: [],
+      totalMatches: 0,
+      hotArticle: null,
+      statusMap: {
+        'upcoming': '未开始',
+        'live': '进行中',
+        'finished': '已结束'
+      }
     }
   },
   onLoad() {
     this.checkLogin()
+    this.loadTodayMatches()
+    this.loadArticles()
   },
   onShow() {
     this.checkLogin()
+    this.loadTodayMatches()
+    this.loadArticles()
   },
   methods: {
+    loadTodayMatches() {
+      getMatchList().then(res => {
+        if (res.code === 200) {
+          this.totalMatches = res.data.total
+          // 只显示前3场比赛
+          const allMatches = res.data.matches.map(match => ({
+            id: match.id,
+            date: match.match_date,
+            status: match.status,
+            team1: {
+              name: match.home_team_name,
+              logo: match.home_team_logo,
+              score: match.home_team_score
+            },
+            team2: {
+              name: match.away_team_name,
+              logo: match.away_team_logo,
+              score: match.away_team_score
+            }
+          }))
+          this.matches = allMatches.slice(0, 3)
+        }
+      }).catch(err => {
+        console.error('加载比赛失败', err)
+      })
+    },
+    loadArticles() {
+      getArticleList().then(res => {
+        if (res.code === 200) {
+          // 只显示第一篇文章作为热门新闻
+          this.hotArticle = res.data.articles[0] || null
+        }
+      }).catch(err => {
+        console.error('加载文章失败', err)
+      })
+    },
     checkLogin() {
       const userInfo = uni.getStorageSync('userInfo')
       if (userInfo) {
@@ -203,21 +212,56 @@ export default {
         }
       })
     },
-    goNewsDetail(id) {
-      uni.navigateTo({
-        url: `/pages/news/detail?id=${id}`
-      })
-    },
     goToRanking() {
       uni.navigateTo({
         url: '/pages/ranking/index'
       })
+    },
+    goToStars() {
+      uni.navigateTo({
+        url: '/pages/stars/index'
+      })
+    },
+    goToForum() {
+      uni.navigateTo({
+        url: '/pages/forum/index'
+      })
+    },
+    goToMessages() {
+      uni.navigateTo({
+        url: '/pages/messages/index'
+      })
+    },
+    goToArticle(articleId) {
+      uni.navigateTo({
+        url: `/pages/forum/detail?id=${articleId}`
+      })
+    },
+    showAllMatches() {
+      uni.navigateTo({
+        url: '/pages/matches/today'
+      })
+    },
+    getTodayDate() {
+      const today = new Date()
+      const month = today.getMonth() + 1
+      const day = today.getDate()
+      return `${month}月${day}日`
     },
     showComingSoon(feature) {
       uni.showToast({
         title: `${feature}功能开发中`,
         icon: 'none'
       })
+    },
+    getStatusLabel(status) {
+      return this.statusMap[status] || status
+    },
+    goToSearch() {
+      uni.navigateTo({ url: '/pages/search/index' })
+    },
+    goToShop() {
+      uni.navigateTo({ url: '/pages/shop/index' })
     }
   }
 }
@@ -266,6 +310,12 @@ export default {
   border: none;
   font-size: 28rpx;
   color: #333;
+}
+
+.search-placeholder {
+  flex: 1;
+  font-size: 28rpx;
+  color: #999;
 }
 
 .app-btn {
@@ -346,6 +396,98 @@ export default {
   color: white;
 }
 
+.shop-banner {
+  margin: 15rpx 20rpx;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8rpx 20rpx rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.shop-banner:active {
+  transform: scale(0.98);
+}
+
+.banner-badge {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  padding: 8rpx 20rpx;
+  background-color: #ff4757;
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 8rpx rgba(255, 71, 87, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.banner-icon {
+  font-size: 70rpx;
+  filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.2));
+}
+
+.banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.banner-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+}
+
+.banner-subtitle {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.banner-btn {
+  padding: 15rpx 30rpx;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.banner-arrow {
+  font-size: 50rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
 .matches-container {
   background-color: #fff;
   margin: 15rpx 0;
@@ -405,12 +547,16 @@ export default {
   font-size: 36rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 8rpx;
 }
 
-.score-sub {
+.match-status {
   font-size: 22rpx;
   color: #999;
+  margin-top: 8rpx;
+  padding: 4rpx 12rpx;
+  background-color: #f5f5f5;
+  border-radius: 10rpx;
+  display: inline-block;
 }
 
 .more-matches {
@@ -422,6 +568,7 @@ export default {
   margin: 15rpx 0;
   font-size: 26rpx;
   color: #333;
+  cursor: pointer;
 }
 
 .arrow {
@@ -429,91 +576,53 @@ export default {
   font-weight: bold;
 }
 
-.features {
-  display: flex;
-  justify-content: space-around;
+.hot-news {
   background-color: #fff;
-  padding: 30rpx 0;
   margin: 15rpx 0;
+  overflow: hidden;
 }
 
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.news-header {
+  padding: 20rpx 20rpx 15rpx;
+  border-bottom: 1rpx solid #eee;
 }
 
-.feature-icon {
-  font-size: 60rpx;
-  margin-bottom: 10rpx;
+.news-title-text {
+  font-size: 32rpx;
   font-weight: bold;
-  color: #e74c3c;
-}
-
-.feature-name {
-  font-size: 24rpx;
   color: #333;
 }
 
-.news-container {
-  background-color: #fff;
-  margin: 15rpx 0;
+.news-cover {
+  width: 100%;
+  height: 400rpx;
 }
 
-.news-item {
-  display: flex;
-  padding: 20rpx;
-  border-bottom: 1rpx solid #eee;
-  position: relative;
-}
-
-.news-content {
-  flex: 1;
-  margin-right: 15rpx;
+.news-info {
+  padding: 25rpx 20rpx;
 }
 
 .news-title {
-  font-size: 28rpx;
+  font-size: 32rpx;
+  font-weight: bold;
   color: #333;
-  line-height: 1.4;
-  margin-bottom: 10rpx;
+  line-height: 1.5;
+  margin-bottom: 15rpx;
 }
 
 .news-meta {
   display: flex;
-  font-size: 22rpx;
-  color: #999;
-}
-
-.comment-count::before {
-  content: '评 ';
-}
-
-.like-count::before {
-  content: '赞 ';
-  margin-left: 15rpx;
-}
-
-.news-image {
-  width: 100rpx;
-  height: 80rpx;
-  border-radius: 4rpx;
-  background-color: #f0f0f0;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 40rpx;
+  font-size: 24rpx;
   color: #999;
+  gap: 8rpx;
 }
 
-.news-tag {
-  position: absolute;
-  top: 20rpx;
-  right: 20rpx;
-  background-color: #e74c3c;
-  color: white;
-  padding: 4rpx 10rpx;
-  border-radius: 3rpx;
-  font-size: 20rpx;
+.author {
+  color: #666;
+}
+
+.dot {
+  color: #ddd;
 }
 </style>

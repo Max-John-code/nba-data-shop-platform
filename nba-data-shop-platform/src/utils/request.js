@@ -6,8 +6,17 @@ export const request = (options) => {
   return new Promise((resolve, reject) => {
     const token = uni.getStorageSync('token')
     
+    // 处理GET请求的参数
+    let url = BASE_URL + options.url
+    if (options.method === 'GET' && options.params) {
+      const queryString = Object.keys(options.params)
+        .map(key => `${key}=${encodeURIComponent(options.params[key])}`)
+        .join('&')
+      url += (url.includes('?') ? '&' : '?') + queryString
+    }
+    
     uni.request({
-      url: BASE_URL + options.url,
+      url: url,
       method: options.method || 'GET',
       data: options.data || {},
       header: {

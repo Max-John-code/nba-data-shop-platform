@@ -21,6 +21,14 @@
 }
 },
 {
+"path": "pages/stars/index",
+"style": {
+"navigationBarTitleText": "现役球星",
+"navigationBarBackgroundColor": "#ffd700",
+"navigationBarTextStyle": "black"
+}
+},
+{
 "path": "pages/profile/index",
 "style": {
 "navigationBarTitleText": "个人中心"
@@ -66,6 +74,114 @@
 "path": "pages/admin/star-form",
 "style": {
 "navigationBarTitleText": "球星信息"
+}
+},
+{
+"path": "pages/admin/matches",
+"style": {
+"navigationBarTitleText": "今日赛事管理"
+}
+},
+{
+"path": "pages/admin/match-form",
+"style": {
+"navigationBarTitleText": "比赛信息"
+}
+},
+{
+"path": "pages/admin/articles",
+"style": {
+"navigationBarTitleText": "交流论坛管理"
+}
+},
+{
+"path": "pages/admin/article-form",
+"style": {
+"navigationBarTitleText": "文章信息"
+}
+},
+{
+"path": "pages/forum/index",
+"style": {
+"navigationBarTitleText": "交流论坛"
+}
+},
+{
+"path": "pages/forum/detail",
+"style": {
+"navigationBarTitleText": "文章详情"
+}
+},
+{
+"path": "pages/admin/messages",
+"style": {
+"navigationBarTitleText": "留言板管理"
+}
+},
+{
+"path": "pages/messages/index",
+"style": {
+"navigationBarTitleText": "留言板"
+}
+},
+{
+"path": "pages/matches/today",
+"style": {
+"navigationBarTitleText": "今日比赛"
+}
+},
+{
+"path": "pages/search/index",
+"style": {
+"navigationBarTitleText": "搜索"
+}
+},
+{
+"path": "pages/shop/index",
+"style": {
+"navigationBarTitleText": "球星商城"
+}
+},
+{
+"path": "pages/shop/detail",
+"style": {
+"navigationBarTitleText": "商品详情"
+}
+},
+{
+"path": "pages/shop/cart",
+"style": {
+"navigationBarTitleText": "购物车"
+}
+},
+{
+"path": "pages/shop/checkout",
+"style": {
+"navigationBarTitleText": "确认订单"
+}
+},
+{
+"path": "pages/shop/orders",
+"style": {
+"navigationBarTitleText": "我的订单"
+}
+},
+{
+"path": "pages/admin/products",
+"style": {
+"navigationBarTitleText": "商品管理"
+}
+},
+{
+"path": "pages/admin/product-form",
+"style": {
+"navigationBarTitleText": "商品信息"
+}
+},
+{
+"path": "pages/admin/orders",
+"style": {
+"navigationBarTitleText": "订单管理"
 }
 }
 ],

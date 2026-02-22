@@ -10,7 +10,8 @@
 
     <view class="player-list">
       <view v-for="player in players" :key="player.id" class="player-item">
-        <view class="player-rank">{{ player.ranking }}</view>
+        <view v-if="player.ranking >= 1 && player.ranking <= 3" class="player-rank">{{ player.ranking }}</view>
+        <view v-else class="player-rank-placeholder"></view>
         <view class="player-avatar">
           <image v-if="player.avatar" :src="player.avatar" mode="aspectFill" />
           <view v-else class="avatar-placeholder">{{ player.name.charAt(0) }}</view>
@@ -53,7 +54,17 @@ export default {
       
       getPlayerList('ranking').then(res => {
         if (res.code === 200) {
-          this.players = res.data.players
+          const allPlayers = res.data.players
+          
+          // 分离前三名和其他球员
+          const topThree = allPlayers.filter(p => p.ranking >= 1 && p.ranking <= 3)
+            .sort((a, b) => a.ranking - b.ranking)
+          
+          const others = allPlayers.filter(p => p.ranking === 0 || p.ranking > 3)
+            .sort((a, b) => b.id - a.id)
+          
+          // 合并显示
+          this.players = [...topThree, ...others]
         }
       }).catch(err => {
         console.error('加载球员列表失败', err)
@@ -160,6 +171,10 @@ export default {
   color: #e74c3c;
   min-width: 80rpx;
   text-align: center;
+}
+
+.player-rank-placeholder {
+  min-width: 80rpx;
 }
 
 .player-avatar {

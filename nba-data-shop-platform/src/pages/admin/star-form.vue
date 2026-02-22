@@ -25,11 +25,6 @@
         </view>
 
         <view class="form-item">
-          <view class="form-label">排名 *</view>
-          <input v-model.number="formData.ranking" type="number" placeholder="请输入排名" class="form-input" />
-        </view>
-
-        <view class="form-item">
           <view class="form-label">所属球队</view>
           <input v-model="formData.team" placeholder="请输入所属球队" class="form-input" />
         </view>
@@ -173,11 +168,6 @@ export default {
     submitPlayer() {
       if (!this.formData.name) {
         uni.showToast({ title: '请输入球星姓名', icon: 'none' })
-        return
-      }
-      
-      if (!this.formData.ranking) {
-        uni.showToast({ title: '请输入排名', icon: 'none' })
         return
       }
       
