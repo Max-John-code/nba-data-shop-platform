@@ -57,9 +57,21 @@
       </view>
 
       <view class="menu-item" @click="goToPage('/pages/admin/orders')">
-        <view class="menu-icon">📋</view>
+        <view class="menu-icon order-icon">📋</view>
         <view class="menu-name">订单管理</view>
         <view class="menu-desc">管理用户订单</view>
+      </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/highlights')">
+        <view class="menu-icon highlight-icon">🎬</view>
+        <view class="menu-name">精彩回放管理</view>
+        <view class="menu-desc">管理精彩视频</view>
+      </view>
+
+      <view class="menu-item" @click="goToPage('/pages/admin/stats')">
+        <view class="menu-icon stats-icon">📊</view>
+        <view class="menu-name">数据统计</view>
+        <view class="menu-desc">查看数据分析</view>
       </view>
     </view>
   </view>
@@ -81,13 +93,6 @@ export default {
   methods: {
     goToPage(url) {
       uni.navigateTo({ url })
-    },
-    showComingSoon(moduleName) {
-      uni.showToast({
-        title: `${moduleName}功能开发中`,
-        icon: 'none',
-        duration: 2000
-      })
     },
     goBack() {
       uni.navigateBack()
@@ -197,20 +202,40 @@ export default {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.player-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.rank-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
-.player-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.star-icon {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
 }
 
 .match-icon {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.rank-icon {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+.forum-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.message-icon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.shop-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.order-icon {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.highlight-icon {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.stats-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
 .menu-name {
@@ -226,25 +251,3 @@ export default {
   text-align: center;
 }
 </style>
-
-
-.rank-icon {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.star-icon {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-}
-
-.forum-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.message-icon {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-
-.shop-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}

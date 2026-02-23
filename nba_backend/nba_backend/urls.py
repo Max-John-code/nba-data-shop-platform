@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from search_views import SearchView
 
 urlpatterns = [
@@ -25,5 +27,11 @@ urlpatterns = [
     path('api/forum/', include('forum.urls')),
     path('api/messages/', include('guestbook.urls')),
     path('api/shop/', include('shop.urls')),
+    path('api/highlights/', include('highlights.urls')),
+    path('api/stats/', include('stats.urls')),
     path('api/search/', SearchView.as_view(), name='search'),
 ]
+
+# 开发环境下提供媒体文件访问
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

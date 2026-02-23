@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'forum',
     'guestbook',
     'shop',
+    'highlights',
+    'stats',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +154,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-# 文件上传限制（增加到10MB）
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+# 文件上传限制（增加到100MB用于视频）
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+
+# 媒体文件配置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -183,6 +183,32 @@
 "style": {
 "navigationBarTitleText": "订单管理"
 }
+},
+{
+"path": "pages/highlights/index",
+"style": {
+"navigationBarTitleText": "精彩回放",
+"navigationBarBackgroundColor": "#667eea",
+"navigationBarTextStyle": "white"
+}
+},
+{
+"path": "pages/admin/highlights",
+"style": {
+"navigationBarTitleText": "精彩回放管理"
+}
+},
+{
+"path": "pages/admin/highlight-form",
+"style": {
+"navigationBarTitleText": "精彩回放信息"
+}
+},
+{
+"path": "pages/admin/stats",
+"style": {
+"navigationBarTitleText": "数据统计"
+}
 }
 ],
 "globalStyle": {

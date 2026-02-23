@@ -17,6 +17,7 @@
       <view class="nav-item active">首页</view>
       <view class="nav-item" @click="goToRanking">联盟榜单</view>
       <view class="nav-item" @click="goToStars">现役球星</view>
+      <view class="nav-item" @click="goToHighlights">精彩回放</view>
       <view class="nav-item" @click="goToForum">交流论坛</view>
       <view class="nav-item" @click="goToMessages">留言板</view>
       <view class="nav-item" @click="goToShop">球星商城</view>
@@ -220,6 +221,11 @@ export default {
     goToStars() {
       uni.navigateTo({
         url: '/pages/stars/index'
+      })
+    },
+    goToHighlights() {
+      uni.navigateTo({
+        url: '/pages/highlights/index'
       })
     },
     goToForum() {
