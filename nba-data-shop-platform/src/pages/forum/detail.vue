@@ -1,7 +1,10 @@
 <template>
   <view class="container">
     <view class="article-detail">
-      <view class="article-title">{{ article.title }}</view>
+      <view class="article-header">
+        <view class="article-title">{{ article.title }}</view>
+        <view v-if="article.team" class="team-tag">{{ article.team }}</view>
+      </view>
       
       <view class="article-meta">
         <text class="author">{{ article.author_name }}</text>
@@ -12,6 +15,17 @@
       <view class="article-content">{{ article.content }}</view>
       
       <image v-if="article.image" :src="article.image" mode="widthFix" class="article-image" />
+      
+      <view class="article-actions">
+        <view class="action-btn" @click="toggleLike">
+          <text class="action-icon">{{ article.is_liked ? '❤️' : '🤍' }}</text>
+          <text class="action-text">{{ article.is_liked ? '已点赞' : '点赞' }} ({{ article.likes || 0 }})</text>
+        </view>
+        <view class="action-btn" @click="toggleFavorite">
+          <text class="action-icon">{{ article.is_favorited ? '⭐' : '☆' }}</text>
+          <text class="action-text">{{ article.is_favorited ? '已收藏' : '收藏' }} ({{ article.favorites || 0 }})</text>
+        </view>
+      </view>
     </view>
 
     <view class="comment-section">
@@ -55,6 +69,7 @@
 
 <script>
 import { getArticleDetail, postComment } from '@/api/forum'
+import { likeArticle, unlikeArticle, favoriteArticle, unfavoriteArticle, getArticleStatus } from '@/api/like'
 
 export default {
   data() {
@@ -66,7 +81,11 @@ export default {
         image: '',
         author_name: '',
         view_count: 0,
-        created_at: ''
+        created_at: '',
+        is_liked: false,
+        is_favorited: false,
+        likes: 0,
+        favorites: 0
       },
       comments: [],
       commentContent: ''
@@ -79,20 +98,88 @@ export default {
     }
   },
   methods: {
-    loadArticleDetail() {
+    async loadArticleDetail() {
       uni.showLoading({ title: '加载中...' })
       
-      getArticleDetail(this.articleId).then(res => {
+      try {
+        const res = await getArticleDetail(this.articleId)
         if (res.code === 200) {
           this.article = res.data
           this.comments = res.data.comments || []
+          // 加载点赞收藏状态
+          await this.loadLikeStatus()
         }
-      }).catch(err => {
+      } catch (err) {
         console.error('加载文章详情失败', err)
         uni.showToast({ title: '加载失败', icon: 'none' })
-      }).finally(() => {
+      } finally {
         uni.hideLoading()
-      })
+      }
+    },
+    
+    async loadLikeStatus() {
+      const token = uni.getStorageSync('token')
+      if (!token) return
+      
+      try {
+        const status = await getArticleStatus(this.articleId)
+        this.article.is_liked = status.is_liked
+        this.article.is_favorited = status.is_favorited
+        this.article.likes = status.likes
+        this.article.favorites = status.favorites
+      } catch (error) {
+        console.error('加载状态失败', error)
+      }
+    },
+    
+    async toggleLike() {
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        uni.showToast({ title: '请先登录', icon: 'none' })
+        return
+      }
+      
+      try {
+        if (this.article.is_liked) {
+          await unlikeArticle(this.articleId)
+          this.article.is_liked = false
+          this.article.likes = Math.max(0, (this.article.likes || 0) - 1)
+          uni.showToast({ title: '取消点赞', icon: 'none' })
+        } else {
+          await likeArticle(this.articleId)
+          this.article.is_liked = true
+          this.article.likes = (this.article.likes || 0) + 1
+          uni.showToast({ title: '点赞成功', icon: 'success' })
+        }
+      } catch (error) {
+        console.error('点赞操作失败', error)
+        uni.showToast({ title: '操作失败，请重试', icon: 'none' })
+      }
+    },
+    
+    async toggleFavorite() {
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        uni.showToast({ title: '请先登录', icon: 'none' })
+        return
+      }
+      
+      try {
+        if (this.article.is_favorited) {
+          await unfavoriteArticle(this.articleId)
+          this.article.is_favorited = false
+          this.article.favorites = Math.max(0, (this.article.favorites || 0) - 1)
+          uni.showToast({ title: '取消收藏', icon: 'none' })
+        } else {
+          await favoriteArticle(this.articleId)
+          this.article.is_favorited = true
+          this.article.favorites = (this.article.favorites || 0) + 1
+          uni.showToast({ title: '收藏成功', icon: 'success' })
+        }
+      } catch (error) {
+        console.error('收藏操作失败', error)
+        uni.showToast({ title: '操作失败，请重试', icon: 'none' })
+      }
     },
     submitComment() {
       // 检查是否登录
@@ -172,12 +259,30 @@ export default {
   margin-bottom: 20rpx;
 }
 
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15rpx;
+  margin-bottom: 20rpx;
+}
+
 .article-title {
+  flex: 1;
   font-size: 38rpx;
   font-weight: bold;
   color: #333;
   line-height: 1.4;
-  margin-bottom: 20rpx;
+}
+
+.team-tag {
+  flex-shrink: 0;
+  padding: 8rpx 20rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  font-weight: 500;
 }
 
 .article-meta {
@@ -206,6 +311,35 @@ export default {
 .article-image {
   width: 100%;
   border-radius: 8rpx;
+  margin-bottom: 30rpx;
+}
+
+.article-actions {
+  display: flex;
+  gap: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8rpx;
+  color: #fff;
+  font-size: 28rpx;
+}
+
+.action-icon {
+  font-size: 32rpx;
+}
+
+.action-text {
+  font-weight: 500;
 }
 
 .comment-section {

@@ -10,7 +10,10 @@
 
     <view class="article-list">
       <view v-for="article in articles" :key="article.id" class="article-item">
-        <view class="article-title">{{ article.title }}</view>
+        <view class="article-header">
+          <view class="article-title">{{ article.title }}</view>
+          <view v-if="article.team" class="team-tag">{{ article.team }}</view>
+        </view>
         <view class="article-info">
           <text>作者: {{ article.author_name }}</text>
           <text>浏览: {{ article.view_count }}</text>
@@ -151,11 +154,29 @@ export default {
   margin-bottom: 20rpx;
 }
 
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
 .article-title {
+  flex: 1;
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 15rpx;
+}
+
+.team-tag {
+  flex-shrink: 0;
+  padding: 6rpx 16rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 500;
 }
 
 .article-info {

@@ -24,7 +24,8 @@ export const request = (options) => {
         'Authorization': token ? `Token ${token}` : ''
       },
       success: (res) => {
-        if (res.statusCode === 200) {
+        // 接受 2xx 系列的状态码
+        if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data)
         } else {
           uni.showToast({

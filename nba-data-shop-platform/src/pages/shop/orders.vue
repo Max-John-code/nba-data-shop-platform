@@ -51,6 +51,26 @@
       <text class="empty-icon">📦</text>
       <text class="empty-text">暂无订单</text>
     </view>
+    
+    <!-- 支付弹窗 -->
+    <view v-if="showPaymentModal" class="payment-modal" @click="closePaymentModal">
+      <view class="modal-content" @click.stop>
+        <view class="modal-header">
+          <text class="modal-title">扫码支付</text>
+          <text class="close-btn" @click="closePaymentModal">✕</text>
+        </view>
+        
+        <view class="qrcode-container">
+          <image :src="paymentQRCode" class="qrcode-image" mode="aspectFit" />
+          <text class="qrcode-tip">请使用微信/支付宝扫码支付</text>
+        </view>
+        
+        <view class="modal-footer">
+          <view class="btn-cancel" @click="closePaymentModal">取消</view>
+          <view class="btn-confirm-pay" @click="confirmPayment">已完成支付</view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -67,7 +87,10 @@ export default {
         'shipped': '已发货',
         'completed': '已完成',
         'cancelled': '已取消'
-      }
+      },
+      showPaymentModal: false,
+      currentOrderId: null,
+      paymentQRCode: '/static/payment-qrcode.jpg' // 收款码路径
     }
   },
   onLoad() {
@@ -88,27 +111,31 @@ export default {
       })
     },
     payOrder(orderId) {
-      uni.showModal({
-        title: '确认支付',
-        content: '确认支付该订单吗？',
-        success: (res) => {
-          if (res.confirm) {
-            uni.showLoading({ title: '支付中...' })
-            
-            payOrderApi(orderId).then(res => {
-              if (res.code === 200) {
-                uni.showToast({ title: '支付成功', icon: 'success' })
-                this.loadOrders()
-              }
-            }).catch(err => {
-              console.error('支付失败', err)
-              uni.showToast({ title: '支付失败', icon: 'none' })
-            }).finally(() => {
-              uni.hideLoading()
-            })
-          }
+      this.currentOrderId = orderId
+      this.showPaymentModal = true
+    },
+    
+    confirmPayment() {
+      uni.showLoading({ title: '确认支付中...' })
+      
+      payOrderApi(this.currentOrderId).then(res => {
+        if (res.code === 200) {
+          uni.showToast({ title: '支付成功', icon: 'success' })
+          this.showPaymentModal = false
+          this.currentOrderId = null
+          this.loadOrders()
         }
+      }).catch(err => {
+        console.error('支付失败', err)
+        uni.showToast({ title: '支付失败', icon: 'none' })
+      }).finally(() => {
+        uni.hideLoading()
       })
+    },
+    
+    closePaymentModal() {
+      this.showPaymentModal = false
+      this.currentOrderId = null
     },
     confirmOrder(orderId) {
       uni.showModal({
@@ -327,5 +354,89 @@ export default {
 .empty-text {
   font-size: 28rpx;
   color: #999;
+}
+
+.payment-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  width: 600rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 40rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.qrcode-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50rpx 30rpx;
+}
+
+.qrcode-image {
+  width: 400rpx;
+  height: 400rpx;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 8rpx;
+  margin-bottom: 30rpx;
+}
+
+.qrcode-tip {
+  font-size: 26rpx;
+  color: #666;
+  text-align: center;
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn-cancel,
+.btn-confirm-pay {
+  flex: 1;
+  padding: 30rpx 0;
+  text-align: center;
+  font-size: 30rpx;
+}
+
+.btn-cancel {
+  color: #666;
+  border-right: 1rpx solid #f0f0f0;
+}
+
+.btn-confirm-pay {
+  color: #e74c3c;
+  font-weight: bold;
 }
 </style>

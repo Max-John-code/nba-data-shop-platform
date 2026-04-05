@@ -69,20 +69,33 @@
     </view>
 
     <!-- 热门新闻 -->
-    <view class="hot-news" v-if="hotArticle" @click="goToArticle(hotArticle.id)">
-      <view class="news-header">
-        <view class="news-title-text">热门新闻</view>
+    <view class="hot-news-section">
+      <view class="section-header">
+        <view class="section-title">为你推荐</view>
+        <view class="section-subtitle">基于你的兴趣</view>
       </view>
-      <image v-if="hotArticle.image" :src="hotArticle.image" class="news-cover" mode="aspectFill" />
-      <view class="news-info">
-        <view class="news-title">{{ hotArticle.title }}</view>
-        <view class="news-meta">
-          <text class="author">{{ hotArticle.author_name }}</text>
-          <text class="dot">·</text>
-          <text class="views">{{ hotArticle.view_count }}浏览</text>
-          <text class="dot">·</text>
-          <text class="comments">{{ hotArticle.comment_count }}评论</text>
+      
+      <view v-for="article in recommendedArticles" :key="article.id" 
+            class="news-card" @click="goToArticle(article.id)">
+        <image v-if="article.image" :src="article.image" class="news-cover" mode="aspectFill" />
+        <view class="news-content">
+          <view class="news-header-row">
+            <view class="news-title">{{ article.title }}</view>
+            <view v-if="article.team" class="team-badge">{{ article.team }}</view>
+          </view>
+          <view class="news-meta">
+            <text class="author">{{ article.author_name }}</text>
+            <text class="dot">·</text>
+            <text class="views">{{ article.view_count }}浏览</text>
+            <text class="dot">·</text>
+            <text class="comments">{{ article.comment_count }}评论</text>
+          </view>
         </view>
+      </view>
+      
+      <view v-if="recommendedArticles.length === 0" class="empty-news">
+        <text class="empty-icon">📰</text>
+        <text class="empty-text">暂无推荐内容</text>
       </view>
     </view>
   </view>
@@ -90,7 +103,7 @@
 
 <script>
 import { getMatchList } from '@/api/match'
-import { getArticleList } from '@/api/forum'
+import { getRecommendedArticles } from '@/api/forum'
 
 export default {
   data() {
@@ -99,7 +112,7 @@ export default {
       userRole: '',
       matches: [],
       totalMatches: 0,
-      hotArticle: null,
+      recommendedArticles: [],
       statusMap: {
         'upcoming': '未开始',
         'live': '进行中',
@@ -145,13 +158,12 @@ export default {
       })
     },
     loadArticles() {
-      getArticleList().then(res => {
+      getRecommendedArticles(2).then(res => {
         if (res.code === 200) {
-          // 只显示第一篇文章作为热门新闻
-          this.hotArticle = res.data.articles[0] || null
+          this.recommendedArticles = res.data.articles || []
         }
       }).catch(err => {
-        console.error('加载文章失败', err)
+        console.error('加载推荐文章失败', err)
       })
     },
     checkLogin() {
@@ -277,6 +289,7 @@ export default {
 .container {
   background-color: #f5f5f5;
   min-height: 100vh;
+  padding-bottom: 20rpx;
 }
 
 .header {
@@ -582,46 +595,95 @@ export default {
   font-weight: bold;
 }
 
-.hot-news {
+.hot-news-section {
   background-color: #fff;
-  margin: 15rpx 0;
-  overflow: hidden;
+  margin: 15rpx 0 0 0;
+  padding: 20rpx;
 }
 
-.news-header {
-  padding: 20rpx 20rpx 15rpx;
-  border-bottom: 1rpx solid #eee;
+.section-header {
+  padding-bottom: 25rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  margin-bottom: 10rpx;
 }
 
-.news-title-text {
-  font-size: 32rpx;
+.section-title {
+  font-size: 36rpx;
   font-weight: bold;
   color: #333;
+  margin-bottom: 8rpx;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.news-card {
+  display: flex;
+  gap: 20rpx;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.news-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .news-cover {
-  width: 100%;
-  height: 400rpx;
+  width: 280rpx;
+  height: 210rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
 }
 
-.news-info {
-  padding: 25rpx 20rpx;
+.news-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.news-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10rpx;
+  margin-bottom: 15rpx;
 }
 
 .news-title {
+  flex: 1;
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
   line-height: 1.5;
-  margin-bottom: 15rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.team-badge {
+  flex-shrink: 0;
+  padding: 4rpx 12rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: 500;
 }
 
 .news-meta {
   display: flex;
   align-items: center;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #999;
   gap: 8rpx;
+  margin-top: 5rpx;
 }
 
 .author {
@@ -630,5 +692,24 @@ export default {
 
 .dot {
   color: #ddd;
+}
+
+.empty-news {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0 40rpx 0;
+  gap: 15rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #999;
 }
 </style>

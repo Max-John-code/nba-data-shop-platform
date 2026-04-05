@@ -18,8 +18,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Article
-        fields = ['id', 'title', 'content', 'image', 'author', 'author_name', 
-                  'view_count', 'comment_count', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'image', 'author', 'author_name', 'team',
+                  'view_count', 'comment_count', 'likes', 'favorites', 'created_at', 'updated_at']
         read_only_fields = ['author', 'view_count', 'created_at', 'updated_at']
     
     def get_comment_count(self, obj):
@@ -33,8 +33,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Article
-        fields = ['id', 'title', 'content', 'image', 'author', 'author_name', 
-                  'view_count', 'comment_count', 'comments', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'image', 'author', 'author_name', 'team',
+                  'view_count', 'comment_count', 'comments', 'likes', 'favorites', 'created_at', 'updated_at']
         read_only_fields = ['author', 'view_count', 'created_at', 'updated_at']
     
     def get_comment_count(self, obj):

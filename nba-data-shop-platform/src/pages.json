@@ -209,6 +209,14 @@
 "style": {
 "navigationBarTitleText": "数据统计"
 }
+},
+{
+"path": "pages/profile/favorites",
+"style": {
+"navigationBarTitleText": "我的收藏",
+"navigationBarBackgroundColor": "#667eea",
+"navigationBarTextStyle": "white"
+}
 }
 ],
 "globalStyle": {

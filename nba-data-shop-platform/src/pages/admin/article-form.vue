@@ -11,6 +11,15 @@
       </view>
 
       <view class="form-item">
+        <view class="form-label">所属球队 *</view>
+        <picker :value="teamIndex" :range="teams" @change="onTeamChange" class="form-picker">
+          <view class="picker-display">
+            {{ formData.team || '请选择球队' }}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
         <view class="form-label">文章内容 *</view>
         <textarea 
           v-model="formData.content" 
@@ -49,8 +58,18 @@ export default {
       formData: {
         title: '',
         content: '',
-        image: ''
-      }
+        image: '',
+        team: ''
+      },
+      teams: [
+        '湖人', '勇士', '快船', '国王', '太阳',
+        '独行侠', '火箭', '马刺', '雷霆', '灰熊',
+        '森林狼', '掘金', '开拓者', '爵士', '鹈鹕',
+        '凯尔特人', '篮网', '尼克斯', '76人', '猛龙',
+        '公牛', '骑士', '活塞', '步行者', '雄鹿',
+        '老鹰', '黄蜂', '热火', '魔术', '奇才'
+      ],
+      teamIndex: -1
     }
   },
   onLoad(options) {
@@ -69,7 +88,12 @@ export default {
           this.formData = {
             title: res.data.title,
             content: res.data.content,
-            image: res.data.image || ''
+            image: res.data.image || '',
+            team: res.data.team || ''
+          }
+          // 设置球队选择器的索引
+          if (this.formData.team) {
+            this.teamIndex = this.teams.indexOf(this.formData.team)
           }
         }
       }).catch(err => {
@@ -77,6 +101,10 @@ export default {
       }).finally(() => {
         uni.hideLoading()
       })
+    },
+    onTeamChange(e) {
+      this.teamIndex = e.detail.value
+      this.formData.team = this.teams[this.teamIndex]
     },
     chooseImage() {
       uni.chooseImage({
@@ -141,6 +169,11 @@ export default {
     submitArticle() {
       if (!this.formData.title) {
         uni.showToast({ title: '请输入文章标题', icon: 'none' })
+        return
+      }
+      
+      if (!this.formData.team) {
+        uni.showToast({ title: '请选择所属球队', icon: 'none' })
         return
       }
       
@@ -266,6 +299,24 @@ export default {
   background-color: #fff;
   box-sizing: border-box;
   line-height: 1.6;
+}
+
+.form-picker {
+  width: 100%;
+}
+
+.picker-display {
+  width: 100%;
+  padding: 25rpx 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  background-color: #fff;
+  box-sizing: border-box;
+  min-height: 80rpx;
+  display: flex;
+  align-items: center;
+  color: #333;
 }
 
 .image-upload {

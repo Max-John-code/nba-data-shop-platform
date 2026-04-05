@@ -130,3 +130,119 @@ class HighlightViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         
         return Response({'error': '没有上传文件'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.db import transaction
+from .models import HighlightLike, HighlightFavorite
+
+
+class HighlightLikeView(viewsets.ViewSet):
+    """视频点赞视图"""
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        """点赞视频"""
+        try:
+            highlight = Highlight.objects.get(pk=pk)
+        except Highlight.DoesNotExist:
+            return Response({'error': '视频不存在'}, status=status.HTTP_404_NOT_FOUND)
+        
+        with transaction.atomic():
+            like, created = HighlightLike.objects.get_or_create(
+                user=request.user,
+                highlight=highlight
+            )
+            
+            if created:
+                # 增加点赞数
+                highlight.likes += 1
+                highlight.save()
+                return Response({'message': '点赞成功', 'is_liked': True}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'message': '已经点赞过了', 'is_liked': True}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['delete'])
+    def unlike(self, request, pk=None):
+        """取消点赞"""
+        try:
+            highlight = Highlight.objects.get(pk=pk)
+        except Highlight.DoesNotExist:
+            return Response({'error': '视频不存在'}, status=status.HTTP_404_NOT_FOUND)
+        
+        with transaction.atomic():
+            try:
+                like = HighlightLike.objects.get(user=request.user, highlight=highlight)
+                like.delete()
+                # 减少点赞数
+                if highlight.likes > 0:
+                    highlight.likes -= 1
+                    highlight.save()
+                return Response({'message': '取消点赞成功', 'is_liked': False}, status=status.HTTP_200_OK)
+            except HighlightLike.DoesNotExist:
+                return Response({'message': '未点赞过', 'is_liked': False}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['get'])
+    def status(self, request, pk=None):
+        """获取点赞状态"""
+        try:
+            highlight = Highlight.objects.get(pk=pk)
+        except Highlight.DoesNotExist:
+            return Response({'error': '视频不存在'}, status=status.HTTP_404_NOT_FOUND)
+        
+        is_liked = HighlightLike.objects.filter(user=request.user, highlight=highlight).exists()
+        is_favorited = HighlightFavorite.objects.filter(user=request.user, highlight=highlight).exists()
+        
+        return Response({
+            'is_liked': is_liked,
+            'is_favorited': is_favorited,
+            'likes': highlight.likes,
+            'favorites': highlight.favorites
+        })
+
+
+class HighlightFavoriteView(viewsets.ViewSet):
+    """视频收藏视图"""
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def favorite(self, request, pk=None):
+        """收藏视频"""
+        try:
+            highlight = Highlight.objects.get(pk=pk)
+        except Highlight.DoesNotExist:
+            return Response({'error': '视频不存在'}, status=status.HTTP_404_NOT_FOUND)
+        
+        with transaction.atomic():
+            favorite, created = HighlightFavorite.objects.get_or_create(
+                user=request.user,
+                highlight=highlight
+            )
+            
+            if created:
+                # 增加收藏数
+                highlight.favorites += 1
+                highlight.save()
+                return Response({'message': '收藏成功', 'is_favorited': True}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'message': '已经收藏过了', 'is_favorited': True}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['delete'])
+    def unfavorite(self, request, pk=None):
+        """取消收藏"""
+        try:
+            highlight = Highlight.objects.get(pk=pk)
+        except Highlight.DoesNotExist:
+            return Response({'error': '视频不存在'}, status=status.HTTP_404_NOT_FOUND)
+        
+        with transaction.atomic():
+            try:
+                favorite = HighlightFavorite.objects.get(user=request.user, highlight=highlight)
+                favorite.delete()
+                # 减少收藏数
+                if highlight.favorites > 0:
+                    highlight.favorites -= 1
+                    highlight.save()
+                return Response({'message': '取消收藏成功', 'is_favorited': False}, status=status.HTTP_200_OK)
+            except HighlightFavorite.DoesNotExist:
+                return Response({'message': '未收藏过', 'is_favorited': False}, status=status.HTTP_200_OK)

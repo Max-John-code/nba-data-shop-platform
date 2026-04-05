@@ -11,6 +11,8 @@ class Highlight(models.Model):
     match_date = models.DateField(verbose_name='比赛日期')
     teams = models.CharField(max_length=100, verbose_name='对阵球队')
     views = models.IntegerField(default=0, verbose_name='观看次数')
+    likes = models.IntegerField(default=0, verbose_name='点赞数')
+    favorites = models.IntegerField(default=0, verbose_name='收藏数')
     duration = models.IntegerField(default=0, verbose_name='时长(秒)')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
@@ -42,3 +44,43 @@ class Highlight(models.Model):
                 return f"{settings.MEDIA_URL}{self.cover_image}"
             return self.cover_image
         return ''
+
+
+class HighlightLike(models.Model):
+    """视频点赞模型"""
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, verbose_name='用户')
+    highlight = models.ForeignKey(Highlight, on_delete=models.CASCADE, verbose_name='视频')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    
+    class Meta:
+        db_table = 'highlight_like'
+        verbose_name = '视频点赞'
+        verbose_name_plural = '视频点赞'
+        unique_together = ('user', 'highlight')
+        indexes = [
+            models.Index(fields=['highlight']),
+            models.Index(fields=['user']),
+        ]
+    
+    def __str__(self):
+        return f'{self.user.username} 点赞了 {self.highlight.title}'
+
+
+class HighlightFavorite(models.Model):
+    """视频收藏模型"""
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, verbose_name='用户')
+    highlight = models.ForeignKey(Highlight, on_delete=models.CASCADE, verbose_name='视频')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    
+    class Meta:
+        db_table = 'highlight_favorite'
+        verbose_name = '视频收藏'
+        verbose_name_plural = '视频收藏'
+        unique_together = ('user', 'highlight')
+        indexes = [
+            models.Index(fields=['highlight']),
+            models.Index(fields=['user']),
+        ]
+    
+    def __str__(self):
+        return f'{self.user.username} 收藏了 {self.highlight.title}'

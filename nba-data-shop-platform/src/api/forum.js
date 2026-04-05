@@ -9,6 +9,15 @@ export const getArticleList = () => {
   })
 }
 
+// 获取推荐文章
+export const getRecommendedArticles = (limit = 2) => {
+  return request({
+    url: '/forum/articles/recommended/',
+    method: 'GET',
+    params: { limit, _t: Date.now() }
+  })
+}
+
 // 发表文章（管理员）
 export const publishArticle = (data) => {
   return request({

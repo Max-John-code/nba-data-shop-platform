@@ -16,9 +16,8 @@
         v-for="item in highlights" 
         :key="item.id" 
         class="highlight-item"
-        @click="playVideo(item)"
       >
-        <view class="video-cover">
+        <view class="video-cover" @click="playVideo(item)">
           <image 
             v-if="item.cover_full_url" 
             :src="item.cover_full_url" 
@@ -37,7 +36,27 @@
           <text class="teams">{{ item.teams }}</text>
           <view class="meta">
             <text class="date">{{ item.match_date }}</text>
-            <text class="views">{{ item.views }} 次观看</text>
+            <text class="views">👁️ {{ item.views }}</text>
+          </view>
+          
+          <!-- 点赞和收藏按钮 -->
+          <view class="actions">
+            <button 
+              class="action-btn like-btn" 
+              :class="{ active: item.is_liked }" 
+              @click="toggleLike(item)"
+            >
+              <text class="icon">{{ item.is_liked ? '❤️' : '🤍' }}</text>
+              <text class="count">{{ item.likes || 0 }}</text>
+            </button>
+            <button 
+              class="action-btn favorite-btn" 
+              :class="{ active: item.is_favorited }" 
+              @click="toggleFavorite(item)"
+            >
+              <text class="icon">{{ item.is_favorited ? '⭐' : '☆' }}</text>
+              <text class="count">{{ item.favorites || 0 }}</text>
+            </button>
           </view>
         </view>
       </view>
@@ -71,6 +90,28 @@
         <view class="video-info">
           <text class="video-teams">{{ currentVideo.teams }}</text>
           <text class="video-desc">{{ currentVideo.description }}</text>
+          
+          <!-- 弹窗内的点赞收藏 -->
+          <view class="modal-actions">
+            <button 
+              class="modal-action-btn like-btn" 
+              :class="{ active: currentVideo.is_liked }" 
+              @click="toggleLike(currentVideo)"
+            >
+              <text class="icon">{{ currentVideo.is_liked ? '❤️' : '🤍' }}</text>
+              <text class="text">{{ currentVideo.is_liked ? '已点赞' : '点赞' }}</text>
+              <text class="count">({{ currentVideo.likes || 0 }})</text>
+            </button>
+            <button 
+              class="modal-action-btn favorite-btn" 
+              :class="{ active: currentVideo.is_favorited }" 
+              @click="toggleFavorite(currentVideo)"
+            >
+              <text class="icon">{{ currentVideo.is_favorited ? '⭐' : '☆' }}</text>
+              <text class="text">{{ currentVideo.is_favorited ? '已收藏' : '收藏' }}</text>
+              <text class="count">({{ currentVideo.favorites || 0 }})</text>
+            </button>
+          </view>
         </view>
       </view>
     </view>
@@ -79,6 +120,7 @@
 
 <script>
 import { getHighlightList, incrementViews } from '@/api/highlight'
+import { likeHighlight, unlikeHighlight, favoriteHighlight, unfavoriteHighlight, getHighlightStatus } from '@/api/like'
 
 export default {
   data() {
@@ -97,8 +139,13 @@ export default {
     async loadHighlights() {
       try {
         const res = await getHighlightList()
-        // Django REST framework 直接返回数组
         this.highlights = Array.isArray(res) ? res : (res.data || [])
+        
+        // 如果用户已登录,加载点赞收藏状态
+        const token = uni.getStorageSync('token')
+        if (token && this.highlights.length > 0) {
+          await this.loadLikeStatus()
+        }
       } catch (error) {
         console.error('加载失败', error)
         uni.showToast({
@@ -108,12 +155,113 @@ export default {
       }
     },
     
+    async loadLikeStatus() {
+      // 批量加载每个视频的点赞收藏状态
+      for (let item of this.highlights) {
+        try {
+          const status = await getHighlightStatus(item.id)
+          item.is_liked = status.is_liked
+          item.is_favorited = status.is_favorited
+          item.likes = status.likes
+          item.favorites = status.favorites
+        } catch (error) {
+          console.error('加载状态失败', error)
+        }
+      }
+      this.$forceUpdate()
+    },
+    
+    async toggleLike(item) {
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        })
+        return
+      }
+      
+      try {
+        if (item.is_liked) {
+          await unlikeHighlight(item.id)
+          item.is_liked = false
+          item.likes = Math.max(0, (item.likes || 0) - 1)
+          uni.showToast({
+            title: '取消点赞',
+            icon: 'none'
+          })
+        } else {
+          await likeHighlight(item.id)
+          item.is_liked = true
+          item.likes = (item.likes || 0) + 1
+          uni.showToast({
+            title: '点赞成功',
+            icon: 'success'
+          })
+        }
+        this.$forceUpdate()
+      } catch (error) {
+        console.error('点赞操作失败', error)
+        uni.showToast({
+          title: '操作失败，请重试',
+          icon: 'none'
+        })
+      }
+    },
+    
+    async toggleFavorite(item) {
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        })
+        return
+      }
+      
+      try {
+        if (item.is_favorited) {
+          await unfavoriteHighlight(item.id)
+          item.is_favorited = false
+          item.favorites = Math.max(0, (item.favorites || 0) - 1)
+          uni.showToast({
+            title: '取消收藏',
+            icon: 'none'
+          })
+        } else {
+          await favoriteHighlight(item.id)
+          item.is_favorited = true
+          item.favorites = (item.favorites || 0) + 1
+          uni.showToast({
+            title: '收藏成功',
+            icon: 'success'
+          })
+        }
+        this.$forceUpdate()
+      } catch (error) {
+        console.error('收藏操作失败', error)
+        uni.showToast({
+          title: '操作失败，请重试',
+          icon: 'none'
+        })
+      }
+    },
+    
     playVideo(item) {
-      this.currentVideo = item
+      this.currentVideo = { ...item }
       this.showPlayer = true
     },
     
     closePlayer() {
+      // 同步当前视频的状态回列表
+      const index = this.highlights.findIndex(h => h.id === this.currentVideo.id)
+      if (index !== -1) {
+        this.highlights[index].is_liked = this.currentVideo.is_liked
+        this.highlights[index].is_favorited = this.currentVideo.is_favorited
+        this.highlights[index].likes = this.currentVideo.likes
+        this.highlights[index].favorites = this.currentVideo.favorites
+      }
+      
       this.showPlayer = false
       this.currentVideo = {}
     },
@@ -121,9 +269,10 @@ export default {
     async onVideoPlay() {
       try {
         await incrementViews(this.currentVideo.id)
+        this.currentVideo.views++
         const index = this.highlights.findIndex(h => h.id === this.currentVideo.id)
         if (index !== -1) {
-          this.highlights[index].views++
+          this.highlights[index].views = this.currentVideo.views
         }
       } catch (error) {
         console.error('增加观看次数失败', error)
@@ -269,6 +418,99 @@ export default {
   justify-content: space-between;
   font-size: 24rpx;
   color: #999;
+  margin-bottom: 16rpx;
+}
+
+.actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.action-btn.active {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+}
+
+.action-btn.like-btn.active {
+  color: #ff4d4f;
+}
+
+.action-btn.favorite-btn.active {
+  color: #faad14;
+  background: linear-gradient(135deg, #fffbf0 0%, #fff7e6 100%);
+}
+
+.action-btn .icon {
+  font-size: 32rpx;
+}
+
+.action-btn .count {
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1px solid #eee;
+}
+
+.modal-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.modal-action-btn.active {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+}
+
+.modal-action-btn.like-btn.active {
+  color: #ff4d4f;
+}
+
+.modal-action-btn.favorite-btn.active {
+  color: #faad14;
+  background: linear-gradient(135deg, #fffbf0 0%, #fff7e6 100%);
+}
+
+.modal-action-btn .icon {
+  font-size: 36rpx;
+}
+
+.modal-action-btn .text {
+  font-weight: 500;
+}
+
+.modal-action-btn .count {
+  font-size: 24rpx;
+  opacity: 0.8;
 }
 
 .empty {

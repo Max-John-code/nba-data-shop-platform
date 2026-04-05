@@ -44,6 +44,12 @@
     </view>
 
     <view class="menu-section">
+      <view class="menu-item" @click="goToFavorites">
+        <text class="menu-icon">⭐</text>
+        <text class="menu-label">我的收藏</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
       <view class="menu-item" @click="goToOrders">
         <text class="menu-icon">📦</text>
         <text class="menu-label">我的订单</text>
@@ -288,6 +294,9 @@ export default {
     },
     goToOrders() {
       uni.navigateTo({ url: '/pages/shop/orders' })
+    },
+    goToFavorites() {
+      uni.navigateTo({ url: '/pages/profile/favorites' })
     },
     formatTime(timeStr) {
       if (!timeStr) return ''
